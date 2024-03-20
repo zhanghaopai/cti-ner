@@ -1,37 +1,46 @@
 from torch.utils.data import DataLoader
 
-from ner.PadBatch import PadBatch
 from ner.config import TRAIN_FILE_PATH, DEV_FILE_PATH, TEST_FILE_PATH
 from ner.dataset import NERDataset, getTag2Ids
 from transformers import AdamW, get_linear_schedule_with_warmup
 from ner.model import Bert_BiLSTM_CRF
+import torch
 
+
+def PadBatch(batch):
+    maxlen = max([i[2] for i in batch])
+    token_tensors = torch.LongTensor([i[0] + [0] * (maxlen - len(i[0])) for i in batch])
+    label_tensors = torch.LongTensor([i[1] + [0] * (maxlen - len(i[1])) for i in batch])
+    mask = (token_tensors > 0)
+    return token_tensors, label_tensors, mask
 
 if __name__=="__main__":
     train_dataset = NERDataset(TRAIN_FILE_PATH)  # trainset为预处理好的文本
     eval_dataset = NERDataset(DEV_FILE_PATH)  # validset为预处理好的文本
     test_dataset = NERDataset(TEST_FILE_PATH)  # testset为预处理好的文本
 
-    batch_size = 64
-    padBatch=PadBatch(batch_size)
     train_iter = DataLoader(dataset=train_dataset,
                             batch_size=64,
                             shuffle=True,
-                            num_workers=4)
+                            num_workers=4,
+                            collate_fn=PadBatch)
 
     eval_iter = DataLoader(dataset=eval_dataset,
                            batch_size=32,
                            shuffle=False,
-                           num_workers=4)
+                           num_workers=4,
+                           collate_fn=PadBatch)
 
     test_iter = DataLoader(dataset=test_dataset,
                            batch_size=32,
                            shuffle=False,
-                           num_workers=4)
+                           num_workers=4,
+                           collate_fn=PadBatch)
     model = Bert_BiLSTM_CRF(getTag2Ids())
     optimizer = AdamW(model.parameters(), lr=0.001, eps=1e-6)
     len_dataset = len(train_dataset)
     epoch = 30
+    batch_size = 64
     total_steps = (len_dataset // batch_size) * epoch \
         if len_dataset % batch_size == 0 else ( len_dataset // batch_size + 1) * epoch
 

@@ -46,7 +46,7 @@ class NERDataset(Dataset):
     def __getitem__(self, idx):
         words, tags=self.sentenses[idx], self.tag_li[idx]
         token_ids = tokenizer.convert_tokens_to_ids(words)
-        label_ids=[tag2idx[tag] for tag in tags]
+        label_ids=[tag2idx[tag] for tag in tags if tag!='']
         seqlen=len(label_ids)
         return token_ids, label_ids, seqlen
 
@@ -54,5 +54,4 @@ class NERDataset(Dataset):
 
 if __name__=="__main__":
     print(tag2idx)
-    exit()
     nerDataset = NERDataset(TRAIN_FILE_PATH)
