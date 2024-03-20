@@ -15,10 +15,12 @@ def PadBatch(batch):
     return token_tensors, label_tensors, mask
 
 if __name__=="__main__":
+    # 加载数据集，框架会调用__get_item__逐条获取sentens、label、len
     train_dataset = NERDataset(TRAIN_FILE_PATH)  # trainset为预处理好的文本
     eval_dataset = NERDataset(DEV_FILE_PATH)  # validset为预处理好的文本
     test_dataset = NERDataset(TEST_FILE_PATH)  # testset为预处理好的文本
 
+    # 补全长度
     train_iter = DataLoader(dataset=train_dataset,
                             batch_size=64,
                             shuffle=True,
@@ -36,6 +38,7 @@ if __name__=="__main__":
                            shuffle=False,
                            num_workers=4,
                            collate_fn=PadBatch)
+    # 加载模型
     model = Bert_BiLSTM_CRF(getTag2Ids())
     optimizer = AdamW(model.parameters(), lr=0.001, eps=1e-6)
     len_dataset = len(train_dataset)
