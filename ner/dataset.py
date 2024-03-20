@@ -16,6 +16,7 @@ def getTag2Ids():
 
 class NERDataset(Dataset):
     def __init__(self, f_path):
+        # 句子按照单词分词
         self.sentenses=[]
         self.tag_li=[]
         with open(f_path, mode='r', encoding='utf-8') as f:
@@ -45,10 +46,12 @@ class NERDataset(Dataset):
 
     def __getitem__(self, idx):
         words, tags=self.sentenses[idx], self.tag_li[idx]
+        # sentense 编码
         token_ids = tokenizer.convert_tokens_to_ids(words)
-        label_ids=[tag2idx[tag] for tag in tags if tag!='']
-        seqlen=len(label_ids)
-        return token_ids, label_ids, seqlen
+        # label 编码
+        tag_ids=[tag2idx[tag] for tag in tags]
+        seqlen=len(tag_ids)
+        return token_ids, tag_ids, seqlen
 
 
 

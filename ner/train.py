@@ -60,3 +60,4 @@ if __name__=="__main__":
             optimizer.step()  # 更新优化器
             scheduler.step()  # 更新调度器
             optimizer.zero_grad()
+            print("step: {}, loss: {}".format(step, full_loss.item()))
