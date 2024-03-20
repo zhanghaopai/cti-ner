@@ -32,7 +32,6 @@ class Bert_BiLSTM_CRF(nn.Module):
         return feats
 
     def forward(self, sentence, tags, mask, is_test=False):
-
         emissions = self._get_features(sentence)
         if not is_test:  # 训练阶段，返回loss
             loss = -self.crf.forward(emissions, tags, mask, reduction='mean')
